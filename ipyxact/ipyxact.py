@@ -59,7 +59,12 @@ class IpxactInt(int):
                 raise ValueError("Could not convert expression to an integer: {}".format(args[0]))
             expr = expr[sep+2:]
 
-        return int(expr.replace('_', ''), base)
+        # TODO - fix this properly for Xilinx baesd IP
+        try:
+            return int(expr.replace('_', ''), base)
+        except Exception as e:
+            return expr.replace('_', '')
+
 
 class IpxactBool(str):
     def __new__(cls, *args, **kwargs):
@@ -119,6 +124,7 @@ class IpxactItem(object):
 
         for _name, _type in self.MEMBERS.items():
             tmp = root.find('./{}:{}'.format(ns[0], _name), {ns[0] : ns[1]})
+
             if tmp is not None and tmp.text is not None:
                 setattr(self, _name, eval(_type)(tmp.text))
             else:
